@@ -45,6 +45,23 @@ Route::get('/all/category', [CategoryController::class, 'index'])->name('all.cat
 
 Route::post('/category/add', [CategoryController::class, 'addCategory'])->name('store.category');
 
+/* buat route untuk edit category */
+Route::get('/category/edit/{id}', [CategoryController::class, 'editCategory']);
+/* buat route untuk update category */
+Route::post('/category/update/{id}', [CategoryController::class, 'updateCategory']);
+
+
+/* buat route untuk trush delete category */
+
+Route::get('/trash/category', [CategoryController::class, 'trashCategory'])->name('trash.category');
+
+/* buat route untuk soft delete category */
+
+Route::get('/category/soft/delete/{id}', [CategoryController::class, 'softDelete']);
+
+
+
+
 
 
 

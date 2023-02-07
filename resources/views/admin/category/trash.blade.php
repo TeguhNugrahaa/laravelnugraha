@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <!-- Ini untuk judul kategori dan untuk melemparkan link trash-->
-            All Category | <a href="{{ route('trash.category') }}"> Trash</a>
+            <!-- Ini untuk kategori trash-->
+            List Trash Category
         </h2>
     </x-slot>
 
@@ -55,8 +55,7 @@
                                     </td>
                                     <!-- ini untuk buat update data -->
                                     <td>
-                                        <a href="{{ url('category/edit/'.$category->id) }}" class="btn btn-info"> Edit</a>
-                                        <a href="{{ url('category/soft/delete/'.$category->id) }}" class="btn btn-danger"> Delete</a>
+                                        <a href="" class="btn btn-danger"> Delete</a>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -68,34 +67,8 @@
 
                     <div class="col-md-4">
 
-                        <!-- Jika session ini sukses -->
 
-                        @if(session('success'))
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <strong>{{ session('success')}}</strong>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        @endif
-                        <div class="card-header">
 
-                            Add Category
-                        </div>
-                        <form action="{{ route('store.category') }}" method="POST">
-                            @csrf
-                            <div class="card-body">
-                                <!-- buat form control card body -->
-                                <div class="mb-3">
-                                    <label for="exampleFormControlInput1" class="form-label">Name Category</label>
-                                    <input type="text" class="form-control" id="exampleFormControlInput1" name="name_category" placeholder="input name category">
-
-                                    @error('name_category')
-
-                                    {{ $message }}
-                                    @enderror
-                                </div>
-                                <button type="submit" class="btn btn-primary">Add Category</button>
-                            </div>
-                        </form>
                     </div>
 
                 </div>

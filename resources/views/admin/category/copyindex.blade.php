@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            <!-- Ini untuk judul kategori dan untuk melemparkan link trash-->
-            All Category | <a href="{{ route('trash.category') }}"> Trash</a>
+            <!-- Ini untuk judul kategori-->
+            All Category
         </h2>
     </x-slot>
 
@@ -56,7 +56,7 @@
                                     <!-- ini untuk buat update data -->
                                     <td>
                                         <a href="{{ url('category/edit/'.$category->id) }}" class="btn btn-info"> Edit</a>
-                                        <a href="{{ url('category/soft/delete/'.$category->id) }}" class="btn btn-danger"> Delete</a>
+                                        <a href="" class="btn btn-danger"> Delete</a>
                                     </td>
                                 </tr>
                                 @endforeach
