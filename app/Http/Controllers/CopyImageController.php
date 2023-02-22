@@ -12,27 +12,14 @@ use Illuminate\Support\Carbon;
 // memanggil untuk pengguna image
 use App\Models\Image;
 
-// memanggil untuk pengguna MultiPic
-use App\Models\Multipic;
 
 // tambahkan use untuk unlink data
 
 use Illuminate\Support\Facades\File;
 
-// use untuk storage data
-use Illuminate\Support\Facades\Storage;
-
 class ImageController extends Controller
 {
-    /** @var  \Illuminate\Filesystem\FilesystemManager $storage */
-    private $storage;
 
-    // sebelum masuk jalan ke controller
-    public function __construct()
-    {
-        // ini untuk penyimpanan gambarnya public
-        $this->storage = Storage::disk('public');
-    }
 
     public function index()
     {
@@ -45,9 +32,9 @@ class ImageController extends Controller
     {
         $validated = $request->validate(
             [
-                // required ini wajib diisi form untuk validasi value berarti image untuk semuanya;
+                // required ini wajib diisi;
                 'image_name' => 'required|unique:images|max:255',
-                'upload_image' => ['required', 'image'],
+                //'image' => 'required|mimes:jpg.jpeg,png',
             ],
             [
                 'image_name.required' => 'Nama Image tidak boleh kosong!'
@@ -55,23 +42,44 @@ class ImageController extends Controller
             ]
         );
 
-        $image = $request->file('upload_image');
-        $uploadPath = $this->storage->putFile('image/file', $image);
-        // dapetin path directory file
-        $origin = str_replace('image/file/', '', $uploadPath);
-        $resize = InterventionImage::make($image)->resize(300, 200)->encode();
-        // untuk memanggil resize
-        $this->storage->put('image/file/resize/' . $origin, $resize);
+        $image = $request->file('image');
+
+        //$generate_id = hexdec(uniqid());
+        //$img_extension = strtolower($image->getClientOriginalExtension());
+        //setelah itu buat concatenya generate_id sama img_extensionnya
+        //$img_name =  $generate_id . '.' . $img_extension;
+        //contohnya : namefile123.png
+
+        // memanggil untuk memanggil file imagenya
+        //$location = 'image/file/';
+        //setelah itu buat concatenya location sama img_namenya
+        //$last_img = $location . $img_name;
+        //$image->move($location, $img_name);
+
+        // Ini untuk generate_id nya
+
+
+        $generate_id = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
+
+        //InterventionImage::make($image)->resize(300, 200)->save('image/file/' . $generate_id);
+
+        $img = InterventionImage::make($image)->resize(300, 200)->save('/image/file/' . $generate_id);
+
+        $last_img = 'image/file/' . $generate_id;
+
+
 
         Image::insert([
+
             'image_name' => $request->image_name,
-            'image' => $uploadPath,
+            'image' => $last_img,
             //karena dia carbonnya array hrs pake tanda koma
             'created_at' => Carbon::now(),
+
+
         ]);
 
-        // arahkan ke route belum tentu kalau si back
-        return redirect()->route('all.image')->with('success', 'Data Image berhasil ditambahkan!');
+        return redirect()->back()->with('success', 'Data Image berhasil ditambahkan!');
     }
 
     public function editImage($id)
@@ -81,18 +89,16 @@ class ImageController extends Controller
         $images = Image::findOrFail($id);
         return view('admin.image.edit_image', compact('images'));
     }
-
     // fungstion update image yang merequest untuk id table imagenya
     public function updateImage(Request $request, $id)
     {
-        $image = Image::findOrFail($id);
         //tambahkan method postnya
 
         $validated = $request->validate(
             [
-                // required ini wajib diisi, nullabe edit image name, upload images ketika edit itu tidak selalu orang itu upload gambar, required (wajib) ;
-                'image_name' => ['required', 'max:255', 'unique:images,image_name,' . $id],
-                'upload_image' => ['nullable', 'image']
+                // required ini wajib diisi;
+                'image_name' => 'required|unique:images|max:255',
+                //'image' => 'required|mimes:jpg.jpeg,png',
             ],
             [
                 'image_name.required' => 'Nama Image tidak boleh kosong!'
@@ -100,100 +106,54 @@ class ImageController extends Controller
             ]
         );
 
-        // ngirim ke request data lama
-        $attributes = $request->only(['image_name']);
-        $attributes['updated_at'] = Carbon::now();
+        // validate untuk old_image
+        $old_image = $request->old_image;
+        $image = $request->file('image');
 
-        // if kalo ada upload gambar baru
-        // skip kalo cuma update nama doang
-        if ($request->hasFile('upload_image')) {
-            // upload gambar dulu, kalo berhasil replace image lama
-            $uploadImage = $request->file('upload_image');
-            $uploadPath = $this->storage->putFile('image/file', $uploadImage);
-            $origin = str_replace('image/file/', '', $uploadPath);
-            // ketika mau resize gambarnya dalam bentuk biner (kode komputer) kode komputer bisa nyatuin gambar
-            $resize = InterventionImage::make($uploadImage)->resize(300, 200)->encode();
-            $this->storage->put('image/file/resize/' . $origin, $resize);
-            $attributes['image'] = $uploadPath;
+        $generate_id = hexdec(uniqid());
+        $img_extension = strtolower($image->getClientOriginalExtension());
+        //setelah itu buat concatenya generate_id sama img_extensionnya
+        $img_name =  $generate_id . '.' . $img_extension;
+        //contohnya : namefile123.png
 
-            // proses delete gambar lama dan resizenya
-            $file = $image->image;
-            // fungsi resize
-            $thumbnail = str_replace('image/file', 'image/file/resize', $file);
-            // berarti file asli
-            $this->storage->delete($file);
-            // berarti file yang sudah berubah (resize)
-            $this->storage->delete($thumbnail);
-        }
+        // memanggil untuk memanggil file imagenya
+        $location = 'image/file/';
+        //setelah itu buat concatenya location sama img_namenya
+        $last_img = $location . $img_name;
+        //setelah itu imagenya kita move
+        $image->move($location, $img_name);
 
-        $image->update($attributes);
 
-        return redirect()->route('all.image')->with('success', 'Data Image berhasil diubah!');
-    }
+        //fungsi unlink untuk meremove file yang akan di timpa
+        //dd($old_image);
+        unlink($old_image);
+        //unlink($old_image);
+        Image::findOrFail($id)->update([
 
-    //fungsi untuk deleteImage
-    public function deleteImage($id)
-    {
-        $status = 'failed';
-        $message = 'Data gagal dihapus!';
-        $image = Image::findOrFail($id);
-        $file = $image->image;
+            'image_name' => $request->image_name,
+            'image' => $last_img,
+            //karena dia carbonnya array hrs pake tanda koma
+            'updated_at' => Carbon::now(),
 
-        if ($image->delete()) {
-            $status = 'success';
-            $message = 'Data berhasil di hapus!';
-            //str_replace ubah replacenya ubah gambar
-            $thumbnail = str_replace('image/file', 'image/file/resize', $file);
-            $this->storage->delete($file);
-            $this->storage->delete($thumbnail);
-        }
 
-        return redirect()->route('all.image')->with($status, $message);
-    }
-
-    //fungsi untuk  method multipic
-
-    public function multiPic()
-    {
-
-        // nampilin file semuanya
-        $images = Multipic::all();
-
-        return view('admin.multipic.index', compact('images'));
-    }
-
-    //fungsi untuk  method multiadd post
-    public function multiAdd(Request $request)
-    {
-        $request->validate([
-            'upload_images' => ['required', 'array'],
-            'upload_images.*' => ['image'],
         ]);
 
-        $images = $request->file('upload_images');
-        // manggil upload image
-        foreach ($images as $image) {
-            // nama folder multipic
-            $uploadPath = $this->storage->putFile('multipic', $image);
-            Multipic::create(['image' => $uploadPath]);
-        }
-
-        return redirect()->route('multi.pic')->with('success', 'berhasil upload file');
+        return redirect()->route('all.image')->with('success', 'Data Image berhasil ditambahkan!');
     }
 
-    public function deleteMulti($id)
+
+    //fungsi untuk deleteImage
+
+    public function deleteImage($id)
     {
-        $status = 'failed';
-        $message = 'Data gagal dihapus!';
-        $image = Multipic::findOrFail($id);
-        $file = $image->image;
+        $image = Image::findOrFail($id);
+        //fungsi ini untuk memanggil folder imagenya
+        $old_image = $image->image;
+        unlink($old_image);
+        //ketika ini bisa unlink dia bisa delete
+        //tambahkan method findOrFail
+        Image::findOrFail($id)->delete();
 
-        if ($image->delete()) {
-            $status = 'success';
-            $message = 'Data berhasil di hapus!';
-            $this->storage->delete($file);
-        }
-
-        return redirect()->route('multi.pic')->with($status, $message);
+        return redirect()->back()->with('success', 'Data berhasil di hapus!');
     }
 }
