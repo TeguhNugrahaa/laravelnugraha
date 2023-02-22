@@ -182,4 +182,20 @@ class CategoryController extends Controller
         $categories = Category::findOrFail($id)->delete();
         return redirect()->back()->with('success', 'Data berhasil dihapus!');
     }
+
+
+    public function restoreCat($id)
+    {
+        // ini untuk memanggil latest dengan menggunakan Eloquent ORM untuk restore
+        $categories = Category::withTrashed()->findOrFail($id)->restore();
+        return redirect()->route('all.category')->with('success', 'Data berhasil direstore!');
+    }
+
+
+    public function permanentDelete($id)
+    {
+        // ini untuk memanggil latest dengan menggunakan Eloquent ORM untuk delete permanen
+        $categories = Category::onlyTrashed()->findOrFail($id)->forceDelete();
+        return redirect()->back()->with('success', 'Data berhasil dihapus secara permanen!');
+    }
 }

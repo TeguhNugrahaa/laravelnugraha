@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ImageController;
 
 
 use App\Models\User;
@@ -59,6 +60,38 @@ Route::get('/trash/category', [CategoryController::class, 'trashCategory'])->nam
 
 Route::get('/category/soft/delete/{id}', [CategoryController::class, 'softDelete']);
 
+/* buat route untuk restore category */
+
+Route::get('/category/restore/{id}', [CategoryController::class, 'restoreCat']);
+
+/* buat route untuk delete category */
+
+Route::get('/category/pdelete/{id}', [CategoryController::class, 'permanentDelete']);
+
+/* buat route imagenya */
+Route::get('/all/image', [ImageController::class, 'index'])->name('all.image');
+
+/* buat route imagenya untuk postnya */
+
+Route::post('/add/image/', [ImageController::class, 'addImage'])->name('add.image');
+
+/* buat route imagenya untuk edit */
+Route::get('/edit/image/{id}', [ImageController::class, 'editImage'])->name('image.edit');
+
+/* buat route imagenya untuk update */
+Route::post('/update/image/{id}', [ImageController::class, 'updateImage'])->name('image.update');
+
+/* buat route imagenya untuk hapus image */
+Route::get('/delete/image/{id}', [ImageController::class, 'deleteImage'])->name('image.destroy');
+
+/* buat route untuk multiple image */
+Route::get('/multi/pic/', [ImageController::class, 'multiPic'])->name('multi.pic');
+
+/* buat route post untuk multiple image */
+Route::post('/multi/add/', [ImageController::class, 'multiAdd'])->name('multi.add');
+
+/* buat route untuk multiple image delete*/
+Route::get('/delete/multi/{id}', [ImageController::class, 'deleteMulti'])->name('multi.destroy');
 
 
 
