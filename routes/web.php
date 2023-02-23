@@ -113,13 +113,28 @@ Route::middleware([
         /* Lokasi untuk manggil si Usernya pake Query Builder */
         //$users = DB::table('users')->select->get();
 
-        $users = DB::table('users')->select('*')->get();
+
+        // kalau untuk untuk menyambungkan tabel user di database
+        //$users = DB::table('users')->select('*')->get();
 
         //dd($users->all());
 
-        return view('dashboard', compact('users'));
+        // return untuk adminnya 
+        return view('admin.index');
+
+        // kalau versi ini untuk dashboard user (versi ke 2)
+        //return view('dashboard', compact('users'));
+
     })->name('dashboard');
 });
+
+
+
+// Menampilkan route untuk logout jetstream
+Route::get('/user/logout/', [ImageController::class, 'logout'])->name('user.logout');
+
+
+
 
 
 /*Route::get('/dashboard', function () {

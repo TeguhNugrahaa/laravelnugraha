@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\File;
 // use untuk storage data
 use Illuminate\Support\Facades\Storage;
 
+// use untuk memanggil auth
+
+use Illuminate\Support\Facades\Auth;
+
 class ImageController extends Controller
 {
     /** @var  \Illuminate\Filesystem\FilesystemManager $storage */
@@ -197,5 +201,20 @@ class ImageController extends Controller
         }
 
         return redirect()->route('multi.pic')->with($status, $message);
+    }
+
+
+
+
+    public function logout(Request $request)
+    {
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        // ini fungsi untuk logoutnya 
+        //Auth::guard()->logout();
+
+        return redirect()->route('login')->with('success', 'User Berhasil Logout!');
     }
 }
