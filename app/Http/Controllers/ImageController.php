@@ -217,4 +217,12 @@ class ImageController extends Controller
 
         return redirect()->route('login')->with('success', 'User Berhasil Logout!');
     }
+
+
+
+    public function home()
+    {
+        $images = Image::all();
+        return view('home', compact('images'));
+    }
 }

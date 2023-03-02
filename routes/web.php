@@ -24,9 +24,42 @@ use App\Models\User;
 |
 */
 
+
+// Kalo begini dengan cara home compact dengan ImageControllernya
+
 Route::get('/', function () {
-    return view('welcome');
+    $images = DB::table('images')->get();
+    return view('home', compact('images'));
 });
+
+//Kalo ini untuk view home fungstion di ImageControllernya Versi kedua
+//Route::get('/', [ImageController::class, 'home'])->name('home');
+
+
+
+// ini nanti di arahkan di bagian home frontend yang tadi sudah di copykan
+
+// dan lokasi route ini berada di layouts.master_home
+
+//Route::get('/', function () {
+//return view('layouts.master_home');
+//});
+
+// kalo ini berasalnya dari view home homeblade.php dan buat variabelnya
+
+//Route::get('/', function () {
+
+//$images = DB::table('images')->get();
+//return view('home', compact('images'));
+//});
+
+
+// kalo ini berasalnya dari view welcome.blade.php
+
+//Route::get('/', function () {
+//return view('welcome');
+//});
+
 
 Route::get('/home', function () {
     return view('home');
