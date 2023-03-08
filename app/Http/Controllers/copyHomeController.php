@@ -8,7 +8,6 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Models\slider;
-use Illuminate\Support\Facades\Auth;
 
 
 class HomeController extends Controller
@@ -19,8 +18,6 @@ class HomeController extends Controller
     // sebelum masuk jalan ke controller
     public function __construct()
     {
-        // ini untuk proses autentifikasi
-        $this->middleware('auth');
         // ini untuk penyimpanan gambarnya public
         $this->storage = Storage::disk('public');
     }
@@ -44,12 +41,12 @@ class HomeController extends Controller
     {
 
         $image = $request->file('upload_image');
-        $uploadPath = $this->storage->putFile('image/slider', $image);
+        $uploadPath = $this->storage->putFile('slider/file', $image);
         // dapetin path directory file
-        $origin = str_replace('image/slider/', '', $uploadPath);
+        $origin = str_replace('slider/file/', '', $uploadPath);
         $resize = Image::make($image)->resize(1920, 1000)->encode();
         // untuk memanggil resize
-        $this->storage->put('image/file/resize/' . $origin, $resize);
+        $this->storage->put('slider/file/resize/' . $origin, $resize);
 
         Slider::insert([
             'title' => $request->title,
