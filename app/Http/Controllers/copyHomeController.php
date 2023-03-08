@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Image;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use App\Models\slider;
+use Illuminate\Support\Facades\Auth;
+
+
+class HomeController extends Controller
+{
+    /** @var  \Illuminate\Filesystem\FilesystemManager $storage */
+    private $storage;
+
+    // sebelum masuk jalan ke controller
+    public function __construct()
+    {
+        // ini untuk proses autentifikasi
+        $this->middleware('auth');
+        // ini untuk penyimpanan gambarnya public
+        $this->storage = Storage::disk('public');
+    }
+
+    public function homeSlider()
+    {
+
+        $sliders = Slider::latest()->get();
+        return view('admin.slider.index', compact('sliders'));
+    }
+
+
+    public function addSlider()
+    {
+
+
+        return view('admin.slider.form_add_slider');
+    }
+
+    public function storeSlider(Request $request)
+    {
+
+        $image = $request->file('upload_image');
+        $uploadPath = $this->storage->putFile('image/slider', $image);
+        // dapetin path directory file
+        $origin = str_replace('image/slider/', '', $uploadPath);
+        $resize = Image::make($image)->resize(1920, 1000)->encode();
+        // untuk memanggil resize
+        $this->storage->put('image/file/resize/' . $origin, $resize);
+
+        Slider::insert([
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $uploadPath,
+            //karena dia carbonnya array hrs pake tanda koma
+            'created_at' => Carbon::now(),
+        ]);
+
+        // arahkan ke route belum tentu kalau si back
+        return redirect()->route('home.slider')->with('success', 'Data Image berhasil ditambahkan!');
+    }
+}

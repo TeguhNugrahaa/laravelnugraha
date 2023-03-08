@@ -8,6 +8,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\HomeController;
 
 
 use App\Models\User;
@@ -125,6 +126,20 @@ Route::post('/multi/add/', [ImageController::class, 'multiAdd'])->name('multi.ad
 
 /* buat route untuk multiple image delete*/
 Route::get('/delete/multi/{id}', [ImageController::class, 'deleteMulti'])->name('multi.destroy');
+
+
+/* buat route untuk admin slider */
+Route::get('/home/slider/', [HomeController::class, 'homeSlider'])->name('home.slider');
+
+/* buat route untuk add slider */
+
+Route::get('/add/slider/', [HomeController::class, 'addSlider'])->name('add.slider');
+
+/* buat route untuk store slider */
+
+// Route::post('/store/slider', [HomeController::class, 'storeSlider'])->name('store.slider');
+Route::post('/store/slider', [HomeController::class, 'storeSlider'])->name('store.slider');
+
 
 
 
