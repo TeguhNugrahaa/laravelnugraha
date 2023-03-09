@@ -5,11 +5,23 @@ namespace App\Http\Controllers;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use App\Models\slider;
 
 
 class HomeController extends Controller
 {
+    /** @var  \Illuminate\Filesystem\FilesystemManager $storage */
+    private $storage;
+
+    // sebelum masuk jalan ke controller
+    public function __construct()
+    {
+        // ini untuk penyimpanan gambarnya public
+        $this->storage = Storage::disk('public');
+    }
+
     public function homeSlider()
     {
 
@@ -21,27 +33,45 @@ class HomeController extends Controller
     public function addSlider()
     {
 
-        //$sliders = Slider::latest()->get();
+
         return view('admin.slider.form_add_slider');
     }
 
     public function storeSlider(Request $request)
     {
-        //kalau mau request data ke server biasanya di debug dluw pakek try and catch
-        $date = date('YmdHisgis'); //untuk membedakan nama filenya kita beri date
-        try {
-            $slider = new Slider;
-            $slider->title = $request->title;
-            $slider->description = $request->description;
-            if ($request->hasFile('image')) {
-                $request->file('image')->move('slider/file/', $date . $request->file('image')->getClientOriginalName());
-                $slider->image = $date . $request->file('image')->getClientOriginalName();
-            }
+        $validated = $request->validate(
 
-            $slider->save();
-            return redirect()->route('home.slider')->with('success', 'Data Image berhasil ditambahkan!');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('success', $th->getMessage());
-        }
+            [
+
+                'title' => 'required',
+                'description' => 'required',
+                'image' => 'required|unique:sliders|max:255',
+            ],
+
+            [
+
+                'image.required' => 'silahkan isi formulir data anda!'
+
+            ]
+        );
+
+
+        $image = $request->file('image');
+        $generate_id = hexdec(uniqid()) . '.' . $image->getClientOriginalExtension();
+
+        Image::make($image)->resize(1920, 1000)->save('/slider/file/' . $generate_id);
+
+        $last_img = '/slider/file/' . $generate_id;
+
+        Slider::insert([
+
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $last_img,
+            //karena dia carbonnya array hrs pake tanda koma
+            'created_at' => Carbon::now(),
+
+        ]);
+        return redirect()->route('home.slider')->with('success', 'Data Image berhasil ditambahkan!');
     }
 }
