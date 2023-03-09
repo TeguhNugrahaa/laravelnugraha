@@ -41,7 +41,10 @@ class HomeController extends Controller
     {
 
         $image = $request->file('upload_image');
+
         $uploadPath = $this->storage->putFile('slider/file/', $image);
+
+        $uploadPath = $this->storage->putFile('slider/file', $image);
         // dapetin path directory file
         $origin = str_replace('slider/file/', '', $uploadPath);
         $resize = Image::make($image)->resize(1920, 1000)->encode();

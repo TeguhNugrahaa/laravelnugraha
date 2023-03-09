@@ -72,6 +72,24 @@ class HomeController extends Controller
             'created_at' => Carbon::now(),
 
         ]);
+
+        $image = $request->file('upload_image');
+        $uploadPath = $this->storage->putFile('slider/file', $image);
+        // dapetin path directory file
+        $origin = str_replace('slider/file/', '', $uploadPath);
+        $resize = Image::make($image)->resize(1920, 1000)->encode();
+        // untuk memanggil resize
+        $this->storage->put('slider/file/resize/' . $origin, $resize);
+
+        Slider::insert([
+            'title' => $request->title,
+            'description' => $request->description,
+            'image' => $uploadPath,
+            //karena dia carbonnya array hrs pake tanda koma
+            'created_at' => Carbon::now(),
+        ]);
+
+        // arahkan ke route belum tentu kalau si back
         return redirect()->route('home.slider')->with('success', 'Data Image berhasil ditambahkan!');
     }
 }
